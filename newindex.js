@@ -1,24 +1,24 @@
 $(document).ready(()=>{
-    const urlCovid = "https://covid19.mathdro.id/api/countries/indonesia";
-    const ajaxParser = (data)=>{
-        console.log(data.confirmed.value)
-        console.log(data);
-        const confirm = data.confirmed.value;
-		const recover = data.recovered.value;
-		const death = data.deaths.value;
-		$(".sembuh .centered").append(`<h1 class="case">${recover}</h1>`);
-		$(".positif .centered").append(`<h1 class="case">${confirm}</h1>`);
-		$(".kematian .centered").append(`<h1 class="case">${death}</h1>`);
+    const urlCovid = "https://damp-wave-20892.herokuapp.com/https://api.kawalcorona.com/indonesia";
+    const dataParser = (data)=>{
+        data = data[0]
+        const confirmed = data.positif;
+        const sembuh = data.sembuh;
+        const meninggal = data.meninggal;
+
+        $(".lds-ring").remove();
+		$(".sembuh .centered").append(`<h1 class="case">${sembuh}</h1>`);
+		$(".positif .centered").append(`<h1 class="case">${confirmed}</h1>`);
+		$(".kematian .centered").append(`<h1 class="case">${meninggal}</h1>`);
     };
+    const fetchData = async (urlData)=>{
+        const data = await fetch(urlData,{"method" : "GET"}).then((val)=>{
+            return val.json()
+        });
+        await dataParser(data);
+    }
+    fetchData(urlCovid);
 
-
-    const ajax = new XMLHttpRequest();
-    ajax.onload = (()=>{
-        const data = JSON.parse(ajax.responseText);
-        ajaxParser(data);
-    });
-    ajax.open("GET",urlCovid);
-    ajax.send()
     let counter = 0;
     $(".bars").click(()=>{
         if(counter %2 == 0){
