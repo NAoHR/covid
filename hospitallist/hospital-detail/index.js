@@ -15,7 +15,7 @@ $(document).ready(()=>{
         `);
     };
 
-    const UrlisValid = (dataValid)=>{
+    const UrlisValid = async (dataValid)=>{
         $(".mainitem").append(`
             <h2 class="titlebottom" id="link-back">
                 <a href="../index.html?provinceName=${provBack}&cityName=${citBack}" id="link-back">
@@ -40,8 +40,6 @@ $(document).ready(()=>{
 
         const urlchangeToMaps = "https://rs-bed-covid-api.vercel.app/api/get-hospital-map?hospitalid="
         const changeToMaps = (mapsAjax)=>{
-            console.log(mapsAjax);
-            console.log(dataValid);
             $("#goingToMap").replaceWith(`
             <h2 class="details">
                 <a href="${mapsAjax.data.gmaps}" class="linkMap">
@@ -50,14 +48,6 @@ $(document).ready(()=>{
             </h2>
             `)
         }
-        const ajaxCheckMaps = new XMLHttpRequest;
-        ajaxCheckMaps.onload = (()=>{
-            const mapsData = JSON.parse(ajaxCheckMaps.responseText);
-            changeToMaps(mapsData);
-        })
-        ajaxCheckMaps.open("GET",urlchangeToMaps+String(dataValid.data.id))
-        ajaxCheckMaps.send();
-
 
         dataValid.data.bedDetail.forEach((item,index)=>{
             $(".mainitem").append(`
@@ -79,6 +69,9 @@ $(document).ready(()=>{
                 <br>
             `);
         });
+        const reqTohospital = await fetch(urlchangeToMaps+String(dataValid.data.id));
+        const jsonedRtS = await reqTohospital.json();
+        changeToMaps(jsonedRtS);
     }
 
     const ajaxChecker = (dataTest)=>{
@@ -104,6 +97,7 @@ $(document).ready(()=>{
         if(parameter.get("hospitallid")){
             $(".notiError").css("display","none");
             const checkIteminVerify = parameter.get("hospitallid");
+
             const ajaxRequest = new XMLHttpRequest;
             ajaxRequest.onload = (()=>{
                 const ajaxRequestData = JSON.parse(ajaxRequest.responseText);
