@@ -91,51 +91,58 @@ $(document).ready(()=>{
         }
     }
 
-    const provinceAjax = new XMLHttpRequest;
-    provinceAjax.onload = (()=>{
-        const dataHospitalInProvince = JSON.parse(provinceAjax.responseText);
-        urlProvinceParse(dataHospitalInProvince);
-    })
-    provinceAjax.open("GET",urlProvince);
-    provinceAjax.send();
-    $("#selected").on('change',() => {
-        const valofProvince = $("#selected").val();
-        const ajaxCity = new XMLHttpRequest;
-        ajaxCity.onload = (()=>{
-            const dataAjaxCity = JSON.parse(ajaxCity.responseText);
-            urlCityIdParse(dataAjaxCity);
-            document.getElementById("city").removeAttribute("disabled");
-            document.getElementById("submitdata").removeAttribute("disabled");
-            $("#submitdata").css("color","#eee")
-        });
-        ajaxCity.open("GET",`${urlCityId}${valofProvince}`);
-        ajaxCity.send();
-    });
-    const mainfunc = (sbmit=null,provDataName = null,citDataName = null)=>{
-        const ajaxfinal = new XMLHttpRequest;
-        if(sbmit){
 
+    const getProvice = async () =>{
+        try{
+            const provinceCreds = await fetch(urlProvince);
+            const jsonedProviceCreds = await provinceCreds.json();
+            urlProvinceParse(jsonedProviceCreds);
+        }catch(Err){
+            alert("province api is not working");
         }
-        const provdata = provDataName == null ? $("#selected").val() : provDataName;
-        const citydata = citDataName == null ? $("#city").val() : citDataName;
-        ajaxfinal.onload = (()=>{
-            const dataFinal = JSON.parse(ajaxfinal.responseText);
-            getRoomandHospitalParse(dataFinal,provdata,citydata);
+    }
+    getProvice();
+    $("#selected").on("change" , async () =>{
+        const valofProvince = $("#selected").val();
+        if(valofProvince !== "none"){
+            try{
+                const reqtoCity = await fetch(`${urlCityId}${valofProvince}`);
+                const jsonedReqtoCity = await reqtoCity.json();
+                urlCityIdParse(jsonedReqtoCity);
+                $("#city").prop("disabled",false);
+                $("#submitdata").prop("disabled",false);
+                $("#submitdata").css("color","#eee")
+            }catch(Err){
+                alert("city api is not working");
+            }
+        }else{
+            $("#city").prop("disabled",true);
+            $("#submitdata").prop("disabled",true);
+            $("#submitdata").css("color","var(--textdarker)")
+        }
+    })
+
+    const mainfunc = async (sbmit=null,provDataName = null,citDataName = null) => {
+        try{
+            const provdata = provDataName == null ? $("#selected").val() : provDataName;
+            const citydata = citDataName == null ? $("#city").val() : citDataName;
+            const reqtofinal = await fetch(`https://rs-bed-covid-api.vercel.app/api/get-hospitals?provinceid=${provdata}&cityid=${citydata}&type=1`)
+            const jsonedRTF = await reqtofinal.json()
+            getRoomandHospitalParse(jsonedRTF,provdata,citydata);
             if(sbmit){
                 $("#submitdata").css("width","90px");
                 $("#height").css("height","50px");
             }
-        });
-        
-        ajaxfinal.open("GET",`https://rs-bed-covid-api.vercel.app/api/get-hospitals?provinceid=${provdata}&cityid=${citydata}&type=1`);
-        ajaxfinal.send();
+        }catch(Err){
+            console.log(Err)
+            alert("cant retrify the data");
+        }
     }
     const urlLink = window.location.search;
     const parameterUrlLink = new URLSearchParams(urlLink);
     const prName = parameterUrlLink.get("provinceName")
     const ctName = parameterUrlLink.get("cityName");
-    // console.log(parameterUrlLink.get("provinceName"));
-    // console.log(parameterUrlLink.get("cityName"));
+
     if(prName && ctName){
         $(".right-loader").css("display","inline-block");
         mainfunc(false,prName,ctName);
