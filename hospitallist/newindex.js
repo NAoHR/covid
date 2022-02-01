@@ -128,6 +128,10 @@ $(document).ready(()=>{
             const citydata = citDataName == null ? $("#city").val() : citDataName;
             const reqtofinal = await fetch(`https://rs-bed-covid-api.vercel.app/api/get-hospitals?provinceid=${provdata}&cityid=${citydata}&type=1`)
             const jsonedRTF = await reqtofinal.json()
+            localStorage.setItem("data",JSON.stringify(jsonedRTF));
+            localStorage.setItem("provData",provdata);
+            localStorage.setItem("cityData",citydata);
+            localStorage.setItem("storedDate",Date.now());
             getRoomandHospitalParse(jsonedRTF,provdata,citydata);
             if(sbmit){
                 $("#submitdata").css("width","90px");
@@ -142,10 +146,24 @@ $(document).ready(()=>{
     const parameterUrlLink = new URLSearchParams(urlLink);
     const prName = parameterUrlLink.get("provinceName")
     const ctName = parameterUrlLink.get("cityName");
+    const lsStatus = parameterUrlLink.get("status");
 
     if(prName && ctName){
-        $(".right-loader").css("display","inline-block");
-        mainfunc(false,prName,ctName);
+        if(lsStatus != null && Number(lsStatus) == 1){
+            const {data,storedDate,provData,cityData} = localStorage
+            if(data !== undefined && storedDate !== undefined && provData !== undefined && cityData !== undefined){
+                if(Math.floor(((Date.now() - Number(storedDate)) / 1000)/60) > 3){
+                    mainfunc(false,prName,ctName);
+                }else{
+                    getRoomandHospitalParse(JSON.parse(data),provData,cityData);
+                }
+            }else{
+                mainfunc(false,prName,ctName);
+            }
+        }else{
+            $(".right-loader").css("display","inline-block");
+            mainfunc(false,prName,ctName);
+        }
     }
     $("#submitdata").click(()=>{
         $("#submitdata").css("width","80px");

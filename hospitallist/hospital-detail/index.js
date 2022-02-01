@@ -18,7 +18,7 @@ $(document).ready(()=>{
     const UrlisValid = async (dataValid)=>{
         $(".mainitem").append(`
             <h2 class="titlebottom" id="link-back">
-                <a href="../index.html?provinceName=${provBack}&cityName=${citBack}" id="link-back">
+                <a href="../index.html?provinceName=${provBack}&cityName=${citBack}&status=1" id="link-back">
                     <i class="fa fa-arrow-circle-left" aria-hidden="true"></i> back
                 </a>
             </h2>
@@ -33,7 +33,7 @@ $(document).ready(()=>{
             </h2>
             <br>
             <h2 class="titlebottom">
-                <i class="fa fa-bed" aria-hidden="true"></i> Detail Tempat Tidur
+                <i class="fa fa-bed" aria-hidden="true"></i> ${dataValid.data.bedDetail ? "Tidak ada tempat tidur" : "Detail tempat tidur"}
             </h2>
         `);
 
@@ -48,7 +48,6 @@ $(document).ready(()=>{
             </h2>
             `)
         }
-
         dataValid.data.bedDetail.forEach((item,index)=>{
             $(".mainitem").append(`
                 <h2 class="details" id="titlepenjelas">
